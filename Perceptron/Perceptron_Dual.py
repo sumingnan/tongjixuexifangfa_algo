@@ -54,7 +54,7 @@ class Perceptron(object):
 
             if wx * y[index] <= 0:  # 如果，误分类，需更新alpha值
                 alpha[index] += self.learningStep
-                b += y[index]
+                b += self.learningStep * y[index]
                 index = 0
             else:
                 index += 1
