@@ -20,10 +20,10 @@ class KdNode(object):
         self.left = left #该节点分割左超平面的kd-tree节点
         self.right = right #该节点分割右超平面的kd-tree节点
 
-
+#递归构建KD树
 class KdTree(object):
     def __init__(self, data):
-        k = len(data[0])
+        k = len(data[0])                #数据维度
 
         def CreateNode(split, data_set):  #按第split维划分数据集set创建kd-node
             if not data_set:    #如果数据集为空
@@ -33,7 +33,7 @@ class KdTree(object):
             #data_set
             data_set.sort(key=lambda x : x[split])
             split_pos = len(data_set) // 2  #//为python的整数除法
-            median = data_set[split_pos]
+            median = data_set[split_pos]    #中位数
             split_next = (split + 1) % k  # cycle coordinate
 
             #递归的创建kd树
@@ -54,43 +54,43 @@ def preoder(root):
         preoder(root.right)
 
 def find_nearest(tree, point):
-    k = len(point)  #数据纬度
+    k = len(point)  #数据维度
     def travel(kd_node, target, max_dist):
         if kd_node is None:
             return result([0] * k, float("inf"), 0) #python 用float("inf")和float("-inf")表示正负无穷
 
         nodes_visited = 1
 
-        s = kd_node.split   #进行分割的纬度
-        pivot = kd_node.dom_elt  #进行分割的轴
+        s = kd_node.split                   #进行分割的数据维度
+        pivot = kd_node.dom_elt             #进行分割的轴
 
-        if target[s] <= pivot[s]:       #如果目标点第s维小于分割轴的对应值（目标离左子树更近）
-            nearer_node = kd_node.left  #下一个访问节点为左子树根节点
-            further_node = kd_node.right#同时记录下右子树
+        if target[s] <= pivot[s]:           #如果目标点第s维小于分割轴的对应值（目标离左子树更近）
+            nearer_node = kd_node.left      #下一个访问节点为左子树根节点
+            further_node = kd_node.right    #同时记录下右子树
         else:
             nearer_node = kd_node.right
             further_node = kd_node.left
 
         temp1 = travel(nearer_node, target, max_dist)   #进行遍历找到含有目标点的区域
 
-        nearest = temp1.nearest_dist    #以此叶节点作为"当前最近点"
-        dist = temp1.nearest_dist   #更新最近距离
+        nearest = temp1.nearest_point                    #以此叶节点作为"当前最近点"
+        dist = temp1.nearest_dist                       #更新最近距离
 
         nodes_visited += temp1.nodes_visited
 
         if dist < max_dist:
-            max_dist = dist   #最近点将在以目标点为球心，max_dist为半径的超球体内
+            max_dist = dist                                 #最近点将在以目标点为球心，max_dist为半径的超球体内
 
-        temp_dist = abs(pivot[s] - target[s])   #第s维上目标点与分割面的距离
+        temp_dist = abs(pivot[s] - target[s])               #第s维上目标点与分割面的距离
         if max_dist < temp_dist:
-            return result(nearest, dist, nodes_visited)  #不相交则可以直接返回，不用继续判断
+            return result(nearest, dist, nodes_visited)     #不相交则可以直接返回，不用继续判断
 
         #计算目标点与分割点的欧式距离
         temp_dist = sqrt(sum((p1 - p2) ** 2 for p1, p2 in zip(pivot, target)))
 
         if temp_dist < dist:            #如果更近
             nearest = pivot             #更新更近点
-            dist = max_dist             #更新最近距离
+            dist = temp_dist             #更新最近距离
             max_dist = dist             #更新超球体半径
 
         #检查另一个子节点对应的区域是否右更近的点
@@ -105,30 +105,10 @@ def find_nearest(tree, point):
 
     return travel(tree.root, point, float("inf")) #从根节点开始递归
 
-
-# 产生一个k维随机向量，每维分量值在0~1之间
-def random_point(k):
-    return [random() for _ in range(k)]
-
-
-# 产生n个k维随机向量
-def random_points(k, n):
-    return [random_point(k) for _ in range(n)]
-
-
 if __name__ == "__main__":
     data = [[2, 3], [5, 4], [9, 6], [4, 7], [8, 1], [7, 2]]  # samples
 
     kd = KdTree(data)
-
     ret = find_nearest(kd, [3, 4.5])
     print ret
-
-    N = 400000
-    t0 = clock()
-    kd2 = KdTree(random_points(3, N))  # 构建包含四十万个3维空间样本点的kd树
-    ret2 = find_nearest(kd2, [0.1, 0.5, 0.8])  # 四十万个样本点中寻找离目标最近的点
-    t1 = clock()
-    print "time: ", t1 - t0, "s"
-    print ret2
 
