@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pandas as pd
+#import pandas as pd
 import numpy as np
 
 import time
@@ -23,7 +23,8 @@ class MaxEntropy(object):
 
         self.N = len(trainX)                    #训练集大小
         self.n = len(self.Pxy)                  #特征函数的数目
-        self.M = 100000.0                       #所有特征在(x,y)出现的次数
+        #self.M = 100000.0                       #所有特征在(x,y)出现的次数
+        self.M = max([len(feature[0:]) for feature in self.TX])
 
         self.build_dict()
         self.calEpxy()                          #计算经验分布的期望值
@@ -36,7 +37,7 @@ class MaxEntropy(object):
             self.id2xy[i] = (x, y)
             self.xy2id[(x, y)] = i
     '''
-    计算联合分布的p(x,y)和p(x)的经验分布
+    统计联合分布的p(x,y)和p(x)的经验分布
     '''
     def calPxyPx(self):
         self.Pxy = defaultdict(int)
@@ -90,7 +91,7 @@ class MaxEntropy(object):
     计算模型分布的期望值，书中是83页
     '''
     def calEpx(self):
-        self.Epx = [0.0 for in xrange(self.n)]          #初始化
+        self.Epx = [0.0 for i in xrange(self.n)]          #初始化
 
         for i, X in enumerate(self.TX):
             Pyxs = self.calProbalityYX(X)
@@ -118,3 +119,26 @@ class MaxEntropy(object):
                 alphas.append(alpha)
 
             self.w = [self.w[i] + alphas[i] for i in xrange(self.n)]
+
+    '''
+    预测
+    '''
+    def predict(self, testSet):
+        results = []
+        for test in testSet:
+            result = self.calProbalityYX(test)
+            results.append(result)
+            #results.append(max(result,key=lambda x: x[0])[1])
+        return results
+
+if __name__ == "__main__":
+    trainX = []
+    trainY = []
+    for line in open("testData.dat"):
+        fields = line.strip().split()
+        trainY.append(fields[0])
+        trainX.append(fields[1:])
+
+    ent = MaxEntropy()
+    ent.train(trainX, trainY)
+    print ent.predict([['Sunny']])
