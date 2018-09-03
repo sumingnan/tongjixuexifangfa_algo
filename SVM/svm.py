@@ -7,7 +7,10 @@ import random
 import logging
 
 import pandas as pd
+from sklearn.cross_validation import train_test_split
+from sklearn.metrics import accuracy_score
 
+from generate_dataset import *
 
 
 class SVM(object):
@@ -26,13 +29,13 @@ class SVM(object):
         self.Y = labels
 
         self.b = 0.0
-        self.n = len(features[0])                       #特征数目
-        self.N = len(features)                          #训练样本数目
+        self.n = len(features[0])                           #特征数目
+        self.N = len(features)                              #训练样本数目
         self.alpha = [0.0] * self.N
-        self.E = [self.calE[i] for i in xrange(self.N)]    #计算差值
+        self.E = [self.calE(i) for i in xrange(self.N)]     #计算差值
 
         self.C = 1000
-        self.MaxIteration = 5000                        #最大迭代数目
+        self.MaxIteration = 5000                            #最大迭代数目
 
     '''
     计算差值E，P127 公式7.105
@@ -192,3 +195,31 @@ class SVM(object):
 
         for feature in features:
             results.append(self._predict(feature))
+
+        return results
+
+if __name__ == "__main__":
+
+    print 'start read data'
+    time1 = time.time()
+
+    #选取2/3数据作为训练集  1/3数据作为测试集
+    trainFeatures, trainLabels, testFeatures, testLabels = generate_dataset(2000, visualization=False)
+
+    time2 = time.time()
+    print 'read data cost ', time2 - time1, ' second', '\n'
+
+    print 'start training'
+    svm = SVM()
+    svm.train(trainFeatures, trainLabels)
+
+    time3 = time.time()
+    print 'training cost ', time3 - time2, ' second', '\n'
+
+    print 'start predict'
+    testPredicts = svm.predict(testFeatures)
+    time4 = time.time()
+    print 'predicting cost ', time4 - time3, ' second', '\n'
+
+    score = accuracy_score(testLabels, testPredicts)
+    print 'svm the accuracy score is ', score
