@@ -26,6 +26,46 @@ class Sign(object):
     1. x > v y = 1  x < v y = -1
     '''
     def trainLessthan(self):
-        index = -1
+        bestV = 100000
+        minError = 1000000
+        for i in xrange(self.N):
+            v = self.X[i]
+            error = 0
+            for j in xrange(self.N):
+                if self.X[j] < v:
+                    if self.Y[j] == 1:
+                        error = error + self.w[j]
+                else:
+                    if self.Y[j] == -1:
+                        error = error + self.w[j]
+            if error < minError:
+                bestV = v
+                minError = error
 
+    '''
+    上面两种方向的第二种,
+    2. x > v y = -1 x < v y = 1
+    '''
 
+    def trainLargethan(self):
+        bestV = 100000
+        minError = 1000000
+        for i in xrange(self.N):
+            v = self.X[i]
+            error = 0
+            for j in xrange(self.N):
+                if self.X[j] > v:
+                    if self.Y[j] == 1:
+                        error = error + self.w[j]
+                else:
+                    if self.Y[j] == -1:
+                        error = error + self.w[j]
+            if error < minError:
+                bestV = v
+                minError = error
+
+'''
+adaboost算法，只针对一维数据，用来理解代码使用而已，并没有考虑效率等等
+'''
+class Adaboost(object):
+    
