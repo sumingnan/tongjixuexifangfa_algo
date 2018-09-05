@@ -16,6 +16,7 @@ class LSRTree(object):
         self.s = None
         self.c = np.mean(y[sepIdx])                     #当前节点的平均值（即为c值）
         self.isLeaf = True
+        self.err = 0
     '''
     计算(j, s)的误差
     '''
@@ -71,6 +72,7 @@ class LSRTree(object):
             self.right = LSRTree(self.data, self.y, rightIdx)   #建立右子树
             self.j = j
             self.s = s
+            self.err = error
     '''
     计算此子树的误差
     '''
